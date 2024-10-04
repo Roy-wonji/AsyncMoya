@@ -34,11 +34,6 @@ Then import the PLCommand from thr location you want to use.
 import AsyncMoya
 ```
 
-
-## License
-**PLCommand** is under MIT license. See the [LICENSE](LICENSE) file for more info.
-
-
 ## 사용 방법</br>
 ### requestAsync
 #### 컴바인이랑  async/await 을 같이 사용
