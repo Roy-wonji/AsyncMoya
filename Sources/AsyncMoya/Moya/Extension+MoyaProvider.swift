@@ -85,6 +85,72 @@ extension MoyaProvider {
         }
     }
     
+    //MARK: -  컴바인을 제거하고 Async/Await 으로 만 사용
+    public func requestAsyncAwait<T: Decodable & Sendable>(
+        _ target: Target,
+        decodeTo type: T.Type
+    ) async throws -> T {
+        // async/await API의 일부로, 비동기 작업을 동기식으로 변환할 때 사용됩니다. 여기서 continuation은 비동기 작업이 완료되면 값을 반환하거나 오류를 던지기 위해 사용
+        return try await withCheckedThrowingContinuation { continuation in
+            // MoyaProvider를 사용해 비동기 요청 처리
+            self.request(target) { result in
+                let finalResult: Result<T, Error>
+                switch result {
+                case .success(let response):
+                    guard let httpResponse = response.response else {
+                        finalResult = .failure(DataError.noData)
+                        break
+                    }
+                    // HTTP 상태 코드에 따른 처리
+                    switch httpResponse.statusCode {
+                    case 200, 201, 204, 401:
+                        // 정상 상태 코드
+                        if response.data.isEmpty, T.self == Void.self {
+                            finalResult = .success(Void() as! T)
+                        } else {
+                            let decodeResult: Result<T, Error> = Result {
+                                try response.data.decoded(as: T.self)
+                            }.mapError { error in
+                                Log.error("DecodingError occurred: \(error.localizedDescription)")
+                                return MoyaError.underlying(error, nil)
+                            }
+                            finalResult = decodeResult
+                        }
+                    case 400:
+                        finalResult = .failure(MoyaError.statusCode(response))
+                    case 404:
+                        let errorDecodeResult: Result<ResponseError, Error> = Result {
+                            try response.data.decoded(as: ResponseError.self)
+                        }.mapError { error in
+                            return MoyaError.underlying(error, nil)
+                        }
+                        switch errorDecodeResult {
+                        case .success(let errorResponse):
+                            finalResult = .failure(DataError.customError(errorResponse))
+                        case .failure(let error):
+                            finalResult = .failure(error)
+                        }
+                    default:
+                        finalResult = .failure(DataError.unhandledStatusCode(httpResponse.statusCode))
+                    }
+
+                case .failure(let error):
+                    finalResult = .failure(error)
+                }
+
+                // Result에 따라 continuation 종료
+                switch finalResult {
+                case .success(let value):
+                    continuation.resume(returning: value)
+                    Log.network("\(type) 데이터 통신", value)
+                case .failure(let error):
+                    continuation.resume(throwing: error)
+                    Log.error("네트워크 에러 발생: \(error.localizedDescription)")
+                }
+            }
+        }
+    }
+    
     //MARK: - MoyaProvider에 요청을 AsyncThrowingStream 비동기적으로 처리하는 확장 함수 추가
     public func requestAsyncThrowingStream<T: Decodable & Sendable>(
         _ target: Target,
