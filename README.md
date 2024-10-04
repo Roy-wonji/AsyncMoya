@@ -12,7 +12,7 @@ PLCommand was deployed as Swift Package Manager. Package to install in a project
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/Roy-wonji/AsyncMoya.git", from: "1.0.0")
+        .package(url: "https://github.com/Roy-wonji/AsyncMoya.git", from: "1.0.3")
     ],
     ...
 )
