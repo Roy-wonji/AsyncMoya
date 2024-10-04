@@ -19,7 +19,7 @@ import RxSwift
 @MainActor
 extension MoyaProvider {
     //MARK: - MoyaProvider에 요청을 비동기적으로 처리하는 확장 함수 추가 Sendable swift6 에서 데이터 Race checking 때매 체택
-     func requestAsync<T: Decodable & Sendable>(
+    public func requestAsync<T: Decodable & Sendable>(
         _ target: Target,
         decodeTo type: T.Type
     ) async throws ->  T {
@@ -220,7 +220,7 @@ extension MoyaProvider {
             }
         }
     
-    func requestRxSingle<T: Decodable>(
+    public func requestRxSingle<T: Decodable>(
         _ target: Target,
         decodeTo type: T.Type
     ) -> Single<T> {
@@ -259,7 +259,7 @@ extension MoyaProvider {
                 })
         }
     
-    func requestRxObservable<T: Decodable>(
+    public func requestRxObservable<T: Decodable>(
         _ target: Target,
         decodeTo type: T.Type
     ) -> Observable<T> {
