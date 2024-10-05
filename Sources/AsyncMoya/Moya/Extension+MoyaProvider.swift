@@ -15,6 +15,7 @@ import CombineMoya
 import RxMoya
 import RxSwift
 
+import LogMacro
 
 @MainActor
 extension MoyaProvider {
@@ -53,15 +54,15 @@ extension MoyaProvider {
                     if let moyaError = error as? MoyaError {
                         Log.error("MoyaError occurred: \(moyaError.localizedDescription)")
                         if case .statusCode(let response) = moyaError, response.statusCode == 400{
-                            Log.error("400 토큰 인증실패: triggering retry logic")
+                            #logError("400 토큰 인증실패: triggering retry logic")
                             return moyaError
                         }
                         return moyaError
                     } else if let decodingError = error as? DecodingError {
-                        Log.error("DecodingError occurred: \(decodingError.localizedDescription)")
+                        #logError("DecodingError occurred: \(decodingError.localizedDescription)")
                         return MoyaError.underlying(decodingError, nil)
                     } else if let dataError = error as? DataError {
-                        Log.error("DataError occurred: \(dataError.localizedDescription)")
+                        #logError("DataError occurred: \(dataError.localizedDescription)")
                         return MoyaError.underlying(dataError, nil)
                     } else {
                         let unknownError = NSError(domain: "Unknown Error", code: 0, userInfo: [NSLocalizedDescriptionKey: "An unknown error occurred."])
@@ -76,11 +77,11 @@ extension MoyaProvider {
                     case .failure(let error):
                         continuation.resume(throwing: error)
                         cancellable?.cancel()
-                        Log.error("네트워크 에러", error)
+                        #logError("네트워크 에러", error)
                     }
                 }, receiveValue: {  decodedObject in
                     continuation.resume(returning: decodedObject)
-                    Log.network("\(type) 데이터 통신", decodedObject)
+                    #logNetwork("\(type) 데이터 통신", decodedObject)
                 })
         }
     }
@@ -111,7 +112,7 @@ extension MoyaProvider {
                             let decodeResult: Result<T, Error> = Result {
                                 try response.data.decoded(as: T.self)
                             }.mapError { error in
-                                Log.error("DecodingError occurred: \(error.localizedDescription)")
+                                #logError("DecodingError occurred: \(error.localizedDescription)")
                                 return MoyaError.underlying(error, nil)
                             }
                             finalResult = decodeResult
@@ -142,10 +143,10 @@ extension MoyaProvider {
                 switch finalResult {
                 case .success(let value):
                     continuation.resume(returning: value)
-                    Log.network("\(type) 데이터 통신", value)
+                    #logNetwork("\(type) 데이터 통신", value)
                 case .failure(let error):
                     continuation.resume(throwing: error)
-                    Log.error("네트워크 에러 발생: \(error.localizedDescription)")
+                    #logError("네트워크 에러 발생: \(error.localizedDescription)")
                 }
             }
         }
@@ -276,7 +277,7 @@ extension MoyaProvider {
                     },
                     receiveValue: {  decodedObject in
                         continuation.yield(.success(decodedObject))
-                        Log.network("\(type) 데이터 통신", decodedObject)
+                        #logNetwork("\(type) 데이터 통신", decodedObject)
                     }
                 )
                 
@@ -286,6 +287,7 @@ extension MoyaProvider {
             }
         }
     
+    //MARK: - RxSingle 통신 방식
     public func requestRxSingle<T: Decodable>(
         _ target: Target,
         decodeTo type: T.Type
@@ -297,7 +299,7 @@ extension MoyaProvider {
                         let decodedObject = try response.data.decoded(as: T.self)
                         return .just(decodedObject)
                     } catch let decodingError {
-                        Log.error("Decoding error: \(decodingError.localizedDescription)")
+                        #logError("Decoding error: \(decodingError.localizedDescription)")
                         return .error(decodingError)
                     }
                 }
@@ -305,7 +307,7 @@ extension MoyaProvider {
                     if let moyaError = error as? MoyaError {
                         Log.error("MoyaError occurred: \(moyaError.localizedDescription)")
                         if case .statusCode(let response) = moyaError, response.statusCode == 400 {
-                            Log.error("400 토큰 인증실패: triggering retry logic")
+                            #logError("400 토큰 인증실패: triggering retry logic")
                         }
                         return .error(moyaError)
                     } else {
@@ -314,17 +316,18 @@ extension MoyaProvider {
                             code: 0,
                             userInfo: [NSLocalizedDescriptionKey: "An unknown error occurred."]
                         )
-                        Log.error("Unknown error occurred")
+                        #logError("Unknown error occurred")
                         return .error(MoyaError.underlying(unknownError, nil))
                     }
                 }
                 .do(onSuccess: { data in
-                    Log.network("\(type) 데이터 통신", data)
+                    #logNetwork("\(type) 데이터 통신", data)
                 }, onError: { error in
-                    Log.error("네트워크 에러", error.localizedDescription)
+                    #logError("네트워크 에러", error.localizedDescription)
                 })
         }
     
+    //MARK: - RxObservable 통신 방식
     public func requestRxObservable<T: Decodable>(
         _ target: Target,
         decodeTo type: T.Type
@@ -337,16 +340,16 @@ extension MoyaProvider {
                     let decodedObject = try response.data.decoded(as: T.self)
                     return .just(decodedObject)
                 } catch let decodingError {
-                    Log.error("디코딩 에러: \(decodingError.localizedDescription)")
+                    #logError("디코딩 에러: \(decodingError.localizedDescription)")
                     return .error(decodingError)
                 }
             }
             .catch { error in
                 // Handle errors from Moya
                 if let moyaError = error as? MoyaError {
-                    Log.error("MoyaError occurred: \(moyaError.localizedDescription)")
+                    #logError("MoyaError occurred: \(moyaError.localizedDescription)")
                     if case .statusCode(let response) = moyaError, response.statusCode == 400 {
-                        Log.error("400 토큰 인증실패: triggering retry logic")
+                        #logError("400 토큰 인증실패: triggering retry logic")
                     }
                     return .error(moyaError) 
                 } else {
@@ -360,9 +363,9 @@ extension MoyaProvider {
                 }
             }
             .do(onNext: { data in
-                Log.network("\(type) 데이터 통신", data)
+                #logNetwork("\(type) 데이터 통신", data)
             }, onError: { error in
-                Log.error("네트워크 에러", error.localizedDescription)
+                #logError("네트워크 에러", error.localizedDescription)
             })
     }
 }

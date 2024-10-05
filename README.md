@@ -28,7 +28,6 @@ let package = Package(
     ...
 )
 ```
-Then import the PLCommand from thr location you want to use.
 
 ```swift
 import AsyncMoya
@@ -138,24 +137,17 @@ func getDate() async throws -> CurrentDate? {
 
 
 ### Log Use
+로그 관련 사용은 [LogMacro](https://github.com/Roy-wonji/LogMacro) 해당 라이브러리에 문서를 참고 해주세요. <br>
 
-```swift
-import AsyncMoya
-
-use Error log
-Log.error("Error retrieving CurrentDate: \(error.localizedDescription)")
-
-use network log
-Log.network("Successfully retrieved CurrentDate: \(decodedObject)")
-
-use Debug log
-Log.debug("디버그", "데이터")
-
-```
 
 ## Auther
 서원지(Roy) [suhwj81@gmail.com](suhwj81@gmail.com)
 
+
+## 함께 만들어 나가요
+
+개선의 여지가 있는 모든 것들에 대해 열려있습니다.<br>
+PullRequest를 통해 기여해주세요. 🙏
 
 ## License
 

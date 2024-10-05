@@ -6,7 +6,7 @@
 //
 
 import Moya
-import OSLog
+import LogMacro
 
 public class MoyaLoggingPlugin: PluginType {
     
@@ -19,7 +19,7 @@ public class MoyaLoggingPlugin: PluginType {
     public func willSend(_ request: RequestType, target: TargetType) {
         guard let httpRequest = request.request else {
             #if DEBUG
-            Log.network("--> 유효하지 않은 요청", (Any).self)
+            #logNetwork("--> 유효하지 않은 요청", (Any).self)
             #endif
             return
         }
@@ -40,7 +40,7 @@ public class MoyaLoggingPlugin: PluginType {
         
         log.append("⎣------------------ Request END  -------------------------⎦")
         #if DEBUG
-        Log.network("", log)
+        #logNetwork("", log)
         #endif
     }
     // Response가 왔을 때
@@ -86,7 +86,7 @@ public class MoyaLoggingPlugin: PluginType {
         log.append("\(error.failureReason ?? error.errorDescription ?? "unknown error")\n")
         log.append("<-- END HTTP")
         #if DEBUG
-        Log.network("", log)
+        #logNetwork("", log)
         #endif
         
     }

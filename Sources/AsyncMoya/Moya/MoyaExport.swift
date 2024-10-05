@@ -8,4 +8,5 @@
 @_exported import CombineMoya
 @_exported import Moya
 @_exported import OSLog
+@_exported import LogMacro
 
