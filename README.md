@@ -23,7 +23,7 @@
 let package = Package(
     ...
     dependencies: [
-        .package(url: "https://github.com/Roy-wonji/AsyncMoya.git", from: "1.0.5")
+        .package(url: "https://github.com/Roy-wonji/AsyncMoya.git", from: "1.0.6")
     ],
     ...
 )
