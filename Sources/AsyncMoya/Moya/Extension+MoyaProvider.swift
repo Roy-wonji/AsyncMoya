@@ -16,6 +16,7 @@ import RxMoya
 import RxSwift
 
 import LogMacro
+import EventLimiter
 
 @MainActor
 extension MoyaProvider {
@@ -28,6 +29,7 @@ extension MoyaProvider {
             // async/await API의 일부로, 비동기 작업을 동기식으로 변환할 때 사용됩니다. 여기서 continuation은 비동기 작업이 완료되면 값을 반환하거나 오류를 던지기 위해 사용
             var cancellable: AnyCancellable?
             cancellable = self.requestPublisher(target)
+                .throttle(for: .milliseconds(300), scheduler: RunLoop.main, latest: true)  // 300 밀리 초 동안 하나의 요청 만 허용 하게 허용
                 .tryMap { response -> Data in
                     guard let httpResponse = response.response else {
                         throw DataError.noData
@@ -92,61 +94,64 @@ extension MoyaProvider {
         decodeTo type: T.Type
     ) async throws -> T {
         // async/await API의 일부로, 비동기 작업을 동기식으로 변환할 때 사용됩니다. 여기서 continuation은 비동기 작업이 완료되면 값을 반환하거나 오류를 던지기 위해 사용
+        let throttle = Throttler(for: 0.3, latest: true)
         return try await withCheckedThrowingContinuation { continuation in
-            // MoyaProvider를 사용해 비동기 요청 처리
-            self.request(target) { result in
-                let finalResult: Result<T, Error>
-                switch result {
-                case .success(let response):
-                    guard let httpResponse = response.response else {
-                        finalResult = .failure(DataError.noData)
-                        break
-                    }
-                    // HTTP 상태 코드에 따른 처리
-                    switch httpResponse.statusCode {
-                    case 200, 201, 204, 401:
-                        // 정상 상태 코드
-                        if response.data.isEmpty, T.self == Void.self {
-                            finalResult = .success(Void() as! T)
-                        } else {
-                            let decodeResult: Result<T, Error> = Result {
-                                try response.data.decoded(as: T.self)
+            throttle {
+                // MoyaProvider를 사용해 비동기 요청 처리
+                self.request(target) { result in
+                    let finalResult: Result<T, Error>
+                    switch result {
+                    case .success(let response):
+                        guard let httpResponse = response.response else {
+                            finalResult = .failure(DataError.noData)
+                            break
+                        }
+                        // HTTP 상태 코드에 따른 처리
+                        switch httpResponse.statusCode {
+                        case 200, 201, 204, 401:
+                            // 정상 상태 코드
+                            if response.data.isEmpty, T.self == Void.self {
+                                finalResult = .success(Void() as! T)
+                            } else {
+                                let decodeResult: Result<T, Error> = Result {
+                                    try response.data.decoded(as: T.self)
+                                }.mapError { error in
+                                    #logError("DecodingError occurred: \(error.localizedDescription)")
+                                    return MoyaError.underlying(error, nil)
+                                }
+                                finalResult = decodeResult
+                            }
+                        case 400:
+                            finalResult = .failure(MoyaError.statusCode(response))
+                        case 404:
+                            let errorDecodeResult: Result<ResponseError, Error> = Result {
+                                try response.data.decoded(as: ResponseError.self)
                             }.mapError { error in
-                                #logError("DecodingError occurred: \(error.localizedDescription)")
                                 return MoyaError.underlying(error, nil)
                             }
-                            finalResult = decodeResult
+                            switch errorDecodeResult {
+                            case .success(let errorResponse):
+                                finalResult = .failure(DataError.customError(errorResponse))
+                            case .failure(let error):
+                                finalResult = .failure(error)
+                            }
+                        default:
+                            finalResult = .failure(DataError.unhandledStatusCode(httpResponse.statusCode))
                         }
-                    case 400:
-                        finalResult = .failure(MoyaError.statusCode(response))
-                    case 404:
-                        let errorDecodeResult: Result<ResponseError, Error> = Result {
-                            try response.data.decoded(as: ResponseError.self)
-                        }.mapError { error in
-                            return MoyaError.underlying(error, nil)
-                        }
-                        switch errorDecodeResult {
-                        case .success(let errorResponse):
-                            finalResult = .failure(DataError.customError(errorResponse))
-                        case .failure(let error):
-                            finalResult = .failure(error)
-                        }
-                    default:
-                        finalResult = .failure(DataError.unhandledStatusCode(httpResponse.statusCode))
+                        
+                    case .failure(let error):
+                        finalResult = .failure(error)
                     }
-
-                case .failure(let error):
-                    finalResult = .failure(error)
-                }
-
-                // Result에 따라 continuation 종료
-                switch finalResult {
-                case .success(let value):
-                    continuation.resume(returning: value)
-                    #logNetwork("\(type) 데이터 통신", value)
-                case .failure(let error):
-                    continuation.resume(throwing: error)
-                    #logError("네트워크 에러 발생: \(error.localizedDescription)")
+                    // Result에 따라 continuation 종료
+                    
+                    switch finalResult {
+                    case .success(let value):
+                        continuation.resume(returning: value)
+                        #logNetwork("\(type) 데이터 통신", value)
+                    case .failure(let error):
+                        continuation.resume(throwing: error)
+                        #logError("네트워크 에러 발생: \(error.localizedDescription)")
+                    }
                 }
             }
         }
@@ -160,6 +165,7 @@ extension MoyaProvider {
         // 퍼블리셔를 미리 준비합니다.
         let provider = MoyaProvider<Target>()
         let publisher = provider.requestPublisher(target)
+            .throttle(for: .milliseconds(300), scheduler: RunLoop.main, latest: true)  // 300 밀리 초 동안 하나의 요청 만 허용 하게 허용
             .tryMap { response -> Data in
                 guard let httpResponse = response.response else {
                     throw DataError.noData
@@ -228,6 +234,7 @@ extension MoyaProvider {
             // 퍼블리셔를 미리 준비합니다.
             let provider = MoyaProvider<Target>()
             let publisher = provider.requestPublisher(target)
+            .throttle(for: .milliseconds(300), scheduler: RunLoop.main, latest: true)  // 300 밀리 초 동안 하나의 요청 만 허용 하게 허용
                 .tryMap { response -> Data in
                     guard let httpResponse = response.response else {
                         throw DataError.noData
@@ -289,12 +296,13 @@ extension MoyaProvider {
     
     //MARK: - RxSingle 통신 방식
     public func requestRxSingle<T: Decodable>(
-        _ target: Target,
-        decodeTo type: T.Type
-    ) -> Single<T> {
+            _ target: Target,
+            decodeTo type: T.Type
+        ) -> Single<T> {
             return self.rx.request(target)
-                .observe(on: MainScheduler.instance)
-                .flatMap { response -> Single<T> in
+                .asObservable()
+                .throttle(.milliseconds(300), scheduler: MainScheduler.instance) // throttle 적용: 300 밀리초 동안 하나의 요청만 허용
+                .flatMap { response -> Observable<T> in
                     do {
                         let decodedObject = try response.data.decoded(as: T.self)
                         return .just(decodedObject)
@@ -320,11 +328,12 @@ extension MoyaProvider {
                         return .error(MoyaError.underlying(unknownError, nil))
                     }
                 }
-                .do(onSuccess: { data in
+                .do(onNext: { data in
                     #logNetwork("\(type) 데이터 통신", data)
                 }, onError: { error in
                     #logError("네트워크 에러", error.localizedDescription)
                 })
+                .asSingle() // Observable을 다시 Single로 변환
         }
     
     //MARK: - RxObservable 통신 방식
@@ -335,6 +344,7 @@ extension MoyaProvider {
         return self.rx.request(target)
             .observe(on: MainScheduler.instance)
             .asObservable()
+            .throttle(.milliseconds(300), latest: true, scheduler: MainScheduler.asyncInstance)
             .flatMap { response -> Observable<T> in
                 do {
                     let decodedObject = try response.data.decoded(as: T.self)

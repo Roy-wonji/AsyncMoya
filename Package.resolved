@@ -1,5 +1,5 @@
 {
-  "originHash" : "1576a2041754798b681ada56b4dd0de65471ab773ccda2379c225829ade14274",
+  "originHash" : "5b5053fc79f1a6d1dd999e480b2a988cd81774d8634a1c8e511811d9d3fb404a",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -8,6 +8,15 @@
       "state" : {
         "revision" : "f455c2975872ccd2d9c81594c658af65716e9b9a",
         "version" : "5.9.1"
+      }
+    },
+    {
+      "identity" : "eventlimiter",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/baekteun/EventLimiter.git",
+      "state" : {
+        "revision" : "7d736079df813f84bb4c218f5efe665664041194",
+        "version" : "2.0.0"
       }
     },
     {
