@@ -8,7 +8,7 @@
 import Foundation
 import Moya
 
-enum DataError: Error {
+public enum DataError: Error {
     case error(Error)
     case emptyValue
     case invalidatedType
