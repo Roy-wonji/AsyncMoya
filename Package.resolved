@@ -1,5 +1,5 @@
 {
-  "originHash" : "d4dbcdc98c271e4d76c48b6b41ead6d64617292a5d8ff2911584a3fe97386c50",
+  "originHash" : "ed38db3e3e0cd92f9f213e7141f9f2d7dfd9055161d161d75977056e315c11b4",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Roy-wonji/LogMacro.git",
       "state" : {
-        "revision" : "3f1c1295a44358e82d60c26b7e4f5c4e2203cb15",
-        "version" : "1.0.5"
+        "revision" : "2ef33e485dc87c9afc9b5d680749d6926c352718",
+        "version" : "1.0.8"
       }
     },
     {
