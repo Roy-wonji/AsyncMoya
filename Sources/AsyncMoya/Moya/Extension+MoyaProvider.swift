@@ -19,7 +19,15 @@ import EventLimiter
 
 @MainActor
 extension MoyaProvider {
-  //MARK: - MoyaProvider에 요청을 비동기적으로 처리하는 확장 함수 추가 Sendable swift6 에서 데이터 Race checking 때매 체택
+  // MARK: - Combine 퍼블리셔 기반 async/await 요청
+  /// Combine 퍼블리셔(`requestPublisher`)를 사용해 데이터를 요청하고 디코딩하여 반환합니다.
+  /// 300ms 스로틀링을 적용해 중복 요청을 방지합니다.
+  ///
+  /// - Parameters:
+  ///   - target: 호출할 Moya `Target` 엔드포인트
+  ///   - type: 디코딩할 `Decodable & Sendable` 타입
+  /// - Returns: 디코딩된 객체 `T`
+  /// - Throws: 네트워크 오류, HTTP 상태 코드 오류, 디코딩 오류 등
   public func requestAsync<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -86,8 +94,9 @@ extension MoyaProvider {
         })
     }
   }
-  
-  //MARK: - 특정 조건에서 통신
+
+  // MARK: - HTTP 500 정상 처리 async/await 요청
+  /// HTTP 500을 성공으로 간주하고 처리합니다.
   public func requestAsyncAwaitAllow500<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -156,13 +165,13 @@ extension MoyaProvider {
       }
     }
   }
-  
-  //MARK: -  컴바인을 제거하고 Async/Await 으로 만 사용
+
+  // MARK: - 순수 async/await 요청
+  /// Combine 없이 순수 async/await로 요청합니다.
   public func requestAsyncAwait<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) async throws -> T {
-    // async/await API의 일부로, 비동기 작업을 동기식으로 변환할 때 사용됩니다. 여기서 continuation은 비동기 작업이 완료되면 값을 반환하거나 오류를 던지기 위해 사용
     let throttle = Throttler(for: 0.3, latest: true)
     return try await withCheckedThrowingContinuation { continuation in
       throttle {
@@ -225,8 +234,9 @@ extension MoyaProvider {
       }
     }
   }
-  
-  //MARK: - MoyaProvider에 요청을 AsyncThrowingStream 비동기적으로 처리하는 확장 함수 추가
+
+  // MARK: - AsyncThrowingStream 처리
+  /// `AsyncThrowingStream<T, Error>`로 값을 스트리밍합니다.
   public func requestAsyncThrowingStream<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -294,8 +304,9 @@ extension MoyaProvider {
       }
     }
   }
-  
-  //MARK: - MoyaProvider에 요청을 AsyncStream 비동기적으로 처리하는 확장 함수 추가
+
+  // MARK: - AsyncStream 처리
+  /// `AsyncStream<Result<T, Error>>`로 값을 스트리밍합니다.
   public func requestAsyncStream<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -362,8 +373,9 @@ extension MoyaProvider {
       }
     }
   }
-  
-  //MARK: - RxSingle 통신 방식
+
+  // MARK: - RxSwift Single
+  /// RxSwift `Single<T>`로 요청하고 디코딩된 객체를 반환합니다.
   public func requestRxSingle<T: Decodable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -404,8 +416,9 @@ extension MoyaProvider {
       })
       .asSingle() // Observable을 다시 Single로 변환
   }
-  
-  //MARK: - RxObservable 통신 방식
+
+  // MARK: - RxSwift Observable
+  /// RxSwift `Observable<T>`로 요청하고 디코딩된 객체를 방출합니다.
   public func requestRxObservable<T: Decodable>(
     _ target: Target,
     decodeTo type: T.Type
