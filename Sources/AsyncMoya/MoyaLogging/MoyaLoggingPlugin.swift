@@ -8,7 +8,7 @@
 import Moya
 import LogMacro
 
-public class MoyaLoggingPlugin: PluginType {
+public class MoyaLoggingPlugin: @preconcurrency PluginType {
   
   public init() {}
   
@@ -16,7 +16,7 @@ public class MoyaLoggingPlugin: PluginType {
     return request
   }
   // Request를 보낼 때 호출
-  public func willSend(_ request: RequestType, target: TargetType) {
+  @MainActor public func willSend(_ request: RequestType, target: TargetType) {
     guard let httpRequest = request.request else {
 #if DEBUG
       #logNetwork("--> 유효하지 않은 요청", (Any).self)
@@ -44,7 +44,7 @@ public class MoyaLoggingPlugin: PluginType {
 #endif
   }
   // Response가 왔을 때
-  public func didReceive(_ result: Result<Response, MoyaError>, target: TargetType) {
+  @MainActor public func didReceive(_ result: Result<Response, MoyaError>, target: TargetType) {
     switch result {
     case let .success(response):
       onSucceed(response, target: target, isFromError: false)
@@ -57,7 +57,7 @@ public class MoyaLoggingPlugin: PluginType {
     return result
   }
   
-  public func onSucceed(_ response: Response, target: TargetType, isFromError: Bool) {
+  @MainActor public func onSucceed(_ response: Response, target: TargetType, isFromError: Bool) {
     let request = response.request
     let url = request?.url?.absoluteString ?? "nil"
     let statusCode = response.statusCode
@@ -71,12 +71,12 @@ public class MoyaLoggingPlugin: PluginType {
     log.append("⎣------------------ END HTTP (\(response.data.count)-byte body) ------------------⎦")
 #if DEBUG
     
-    Log.network("", log)
+    #logNetwork("", log)
 #endif
     
   }
   
-  public func onFail(_ error: MoyaError, target: TargetType) {
+  @MainActor public func onFail(_ error: MoyaError, target: TargetType) {
     if let response = error.response {
       onSucceed(response, target: target, isFromError: true)
       return
