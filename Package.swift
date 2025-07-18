@@ -28,7 +28,6 @@ let package = Package(
         .product(name: "EventLimiter", package: "EventLimiter")
       ]
     ),
-  ],
-  swiftLanguageModes: [.version("5.10.0"), .version("6.0")]
+  ]
 )
 
