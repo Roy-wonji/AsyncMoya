@@ -9,10 +9,10 @@ set -e
 OUTPUT_PATH="./docs"
 
 # 문서를 생성할 SPM 타겟 이름
-TARGET_NAME="LogMacro"
+TARGET_NAME="AsyncMoya"
 
 # 정적 호스팅 시 URL 경로의 base path (예: roy-wonji.github.io/LogMacro/…)
-HOSTING_BASE_PATH="LogMacro"
+HOSTING_BASE_PATH="AsyncMoya"
 
 # (만약 xcodebuild으로 DocC 아카이브를 만들고 싶다면 아래 변수를 사용하세요)
 #BUILD_DESTINATION="generic/platform=iOS"
@@ -65,9 +65,9 @@ cat > "${OUTPUT_PATH}/index.html" << 'EOF'
 <script>
   // 브라우저가 /docs/ 에서 열릴 때
   // 로그메크로 패키지 문서 루트(/documentation/logmacro)로 리다이렉트
-  window.location.href += "/documentation/logmacro"
+  window.location.href += "/documentation/asyncmoya"
 </script>
 EOF
 
-echo "✅ DocC 문서가 '${OUTPUT_PATH}/documentation/logmacro' 에 생성되었으며,"
+echo "✅ DocC 문서가 '${OUTPUT_PATH}/documentation/asyncmoya' 에 생성되었으며,"
 echo "   '${OUTPUT_PATH}/index.html' 에 리다이렉트 스크립트를 추가했습니다."
