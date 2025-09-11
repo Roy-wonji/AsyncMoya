@@ -27,7 +27,9 @@ let package = Package(
         .product(name: "RxMoya", package: "Moya"),
         .product(name: "LogMacro", package: "LogMacro"),
         .product(name: "EventLimiter", package: "EventLimiter")
-      ]
+      ],
+      path: "Sources"
+
     ),
   ]
 )

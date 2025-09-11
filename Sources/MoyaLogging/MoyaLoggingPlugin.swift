@@ -8,10 +8,63 @@
 import Moya
 import LogMacro
 
-/// `Log.network`를 사용하여 네트워크 요청과 응답을 로깅하는 Moya 플러그인입니다.
+/// 네트워크 요청과 응답을 상세하게 로깅하는 Moya 플러그인
 ///
-/// - DEBUG 빌드에서만 활성화되어, 요청 전송 전(`willSend`)과 응답 수신 후(`didReceive`)에
-///   HTTP 메서드, URL, 헤더, 본문 및 응답 데이터를 포맷된 메시지로 출력합니다.
+/// `MoyaLoggingPlugin`은 AsyncMoya의 모든 네트워크 통신을 모니터링하고 로깅하는 플러그인입니다.
+/// LogMacro의 `#logNetwork` 매크로를 사용하여 DEBUG 빌드에서만 로그를 출력합니다.
+///
+/// ## 주요 기능
+///
+/// ### 요청 로깅
+/// - HTTP 메서드 (GET, POST, PUT, DELETE 등)
+/// - 요청 URL과 엔드포인트 정보
+/// - HTTP 헤더 정보
+/// - 요청 본문 (JSON, form data 등)
+///
+/// ### 응답 로깅
+/// - HTTP 상태 코드
+/// - 응답 URL
+/// - 응답 데이터 (JSON 형태로 포맷)
+/// - 응답 크기 (바이트 단위)
+///
+/// ### 에러 로깅
+/// - 네트워크 에러 코드
+/// - 에러 원인 및 설명
+/// - 실패한 엔드포인트 정보
+///
+/// ## 사용 방법
+///
+/// ```swift
+/// import AsyncMoya
+/// 
+/// let provider = MoyaProvider<APIService>(
+///     plugins: [MoyaLoggingPlugin()]
+/// )
+/// 
+/// // 이제 모든 네트워크 요청이 자동으로 로깅됩니다
+/// let user = try await provider.requestAsync(.getUser(id: 1), decodeTo: User.self)
+/// ```
+///
+/// ## 로그 출력 예시
+///
+/// ```
+/// ⎡---------------------서버통신을 시작합니다.----------------------⎤
+/// [GET] https://api.example.com/users/1
+/// API: APIService.getUser(id: 1)
+/// 헤더:
+///  ["Content-Type": "application/json", "Authorization": "Bearer token"]
+/// ⎣------------------ Request END  -------------------------⎦
+/// 
+/// ⎡------------------서버에게 Response가 도착했습니다. ------------------⎤
+/// API: APIService.getUser(id: 1)
+/// 상태 코드: [200]
+/// URL: https://api.example.com/users/1
+/// 데이터:
+///   {"id": 1, "name": "John Doe", "email": "john@example.com"}
+/// ⎣------------------ END HTTP (58-byte body) ------------------⎦
+/// ```
+///
+/// > Important: 이 플러그인은 DEBUG 빌드에서만 로그를 출력합니다. Release 빌드에서는 성능에 영향을 주지 않습니다.
 public class MoyaLoggingPlugin: @preconcurrency PluginType {
   /// 플러그인 인스턴스를 생성합니다.
   public init() {}

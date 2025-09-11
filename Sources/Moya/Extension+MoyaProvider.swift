@@ -20,14 +20,28 @@ import EventLimiter
 @MainActor
 extension MoyaProvider {
   // MARK: - Combine 퍼블리셔 기반 async/await 요청
-  /// Combine 퍼블리셔(`requestPublisher`)를 사용해 데이터를 요청하고 디코딩하여 반환합니다.
-  /// 300ms 스로틀링을 적용해 중복 요청을 방지합니다.
+  
+  /// Combine 퍼블리셔를 사용한 async/await 네트워크 요청
+  ///
+  /// 이 메서드는 Combine의 `requestPublisher`를 사용하여 네트워크 요청을 수행하고,
+  /// 결과를 지정된 타입으로 디코딩하여 반환합니다. 300ms 스로틀링을 적용하여
+  /// 중복 요청을 방지합니다.
+  ///
+  /// ```swift
+  /// let provider = MoyaProvider<APIService>()
+  /// let user = try await provider.requestAsync(.getUser(id: 1), decodeTo: User.self)
+  /// ```
   ///
   /// - Parameters:
   ///   - target: 호출할 Moya `Target` 엔드포인트
   ///   - type: 디코딩할 `Decodable & Sendable` 타입
   /// - Returns: 디코딩된 객체 `T`
-  /// - Throws: 네트워크 오류, HTTP 상태 코드 오류, 디코딩 오류 등
+  /// - Throws: 
+  ///   - `DataError.noData`: HTTP 응답이 없는 경우
+  ///   - `MoyaError.statusCode`: HTTP 400 상태 코드
+  ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
+  ///   - `DataError.unhandledStatusCode`: 처리되지 않은 HTTP 상태 코드
+  ///   - 디코딩 오류, 네트워크 오류 등
   public func requestAsync<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -96,7 +110,27 @@ extension MoyaProvider {
   }
 
   // MARK: - HTTP 500 정상 처리 async/await 요청
-  /// HTTP 500을 성공으로 간주하고 처리합니다.
+  
+  /// HTTP 500을 성공으로 간주하는 async/await 네트워크 요청
+  ///
+  /// 이 메서드는 HTTP 500 상태 코드를 정상 응답으로 처리하는 특별한 요청 메서드입니다.
+  /// 일반적으로 서버 오류로 간주되는 500 상태 코드를 성공 케이스로 처리해야 하는
+  /// 특수한 API 요구사항에 사용됩니다.
+  ///
+  /// ```swift
+  /// let provider = MoyaProvider<APIService>()
+  /// let result = try await provider.requestAsyncAwaitAllow500(.specialEndpoint, decodeTo: Response.self)
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - target: 호출할 Moya `Target` 엔드포인트
+  ///   - type: 디코딩할 `Decodable & Sendable` 타입
+  /// - Returns: 디코딩된 객체 `T`
+  /// - Throws:
+  ///   - `DataError.noData`: HTTP 응답이 없는 경우
+  ///   - `MoyaError.statusCode`: HTTP 400 상태 코드
+  ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
+  ///   - `DataError.unhandledStatusCode`: 509 및 기타 처리되지 않은 상태 코드
   public func requestAsyncAwaitAllow500<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -167,7 +201,26 @@ extension MoyaProvider {
   }
 
   // MARK: - 순수 async/await 요청
-  /// Combine 없이 순수 async/await로 요청합니다.
+  
+  /// Combine 없이 순수 async/await로 수행하는 네트워크 요청
+  ///
+  /// 이 메서드는 Combine 프레임워크에 의존하지 않고 순수한 async/await 패턴으로
+  /// 네트워크 요청을 수행합니다. 300ms 스로틀링을 적용하여 중복 요청을 방지합니다.
+  ///
+  /// ```swift
+  /// let provider = MoyaProvider<APIService>()
+  /// let user = try await provider.requestAsyncAwait(.getUser(id: 1), decodeTo: User.self)
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - target: 호출할 Moya `Target` 엔드포인트
+  ///   - type: 디코딩할 `Decodable & Sendable` 타입
+  /// - Returns: 디코딩된 객체 `T`
+  /// - Throws:
+  ///   - `DataError.noData`: HTTP 응답이 없는 경우
+  ///   - `MoyaError.statusCode`: HTTP 400 상태 코드
+  ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
+  ///   - `DataError.unhandledStatusCode`: 처리되지 않은 HTTP 상태 코드
   public func requestAsyncAwait<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -236,7 +289,29 @@ extension MoyaProvider {
   }
 
   // MARK: - AsyncThrowingStream 처리
-  /// `AsyncThrowingStream<T, Error>`로 값을 스트리밍합니다.
+  
+  /// AsyncThrowingStream을 사용한 스트리밍 네트워크 요청
+  ///
+  /// 이 메서드는 `AsyncThrowingStream`을 반환하여 데이터를 스트리밍 방식으로 처리할 수 있게 합니다.
+  /// 실시간 데이터나 연속적인 응답이 필요한 경우에 유용합니다.
+  ///
+  /// ```swift
+  /// let provider = MoyaProvider<APIService>()
+  /// let stream = provider.requestAsyncThrowingStream(.getUpdates, decodeTo: Update.self)
+  /// 
+  /// do {
+  ///     for try await update in stream {
+  ///         print("Received update: \(update)")
+  ///     }
+  /// } catch {
+  ///     print("Stream error: \(error)")
+  /// }
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - target: 호출할 Moya `Target` 엔드포인트
+  ///   - type: 디코딩할 `Decodable & Sendable` 타입
+  /// - Returns: 디코딩된 객체들을 방출하는 `AsyncThrowingStream<T, Error>`
   public func requestAsyncThrowingStream<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -306,7 +381,30 @@ extension MoyaProvider {
   }
 
   // MARK: - AsyncStream 처리
-  /// `AsyncStream<Result<T, Error>>`로 값을 스트리밍합니다.
+  
+  /// AsyncStream을 사용한 Result 기반 스트리밍 네트워크 요청
+  ///
+  /// 이 메서드는 `AsyncStream<Result<T, Error>>`을 반환하여 성공과 실패를 모두 포함하는
+  /// 스트리밍 데이터를 처리할 수 있게 합니다. 에러 처리가 중요한 스트리밍 시나리오에 적합합니다.
+  ///
+  /// ```swift
+  /// let provider = MoyaProvider<APIService>()
+  /// let stream = provider.requestAsyncStream(.getUpdates, decodeTo: Update.self)
+  /// 
+  /// for await result in stream {
+  ///     switch result {
+  ///     case .success(let update):
+  ///         print("Received update: \(update)")
+  ///     case .failure(let error):
+  ///         print("Error: \(error)")
+  ///     }
+  /// }
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - target: 호출할 Moya `Target` 엔드포인트
+  ///   - type: 디코딩할 `Decodable & Sendable` 타입
+  /// - Returns: Result로 래핑된 디코딩된 객체들을 방출하는 `AsyncStream<Result<T, Error>>`
   public func requestAsyncStream<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -375,7 +473,29 @@ extension MoyaProvider {
   }
 
   // MARK: - RxSwift Single
-  /// RxSwift `Single<T>`로 요청하고 디코딩된 객체를 반환합니다.
+  
+  /// RxSwift Single을 사용한 네트워크 요청
+  ///
+  /// 이 메서드는 RxSwift의 `Single<T>` 타입을 반환하여 단일 값을 방출하는
+  /// reactive 스트림을 제공합니다. 300ms 스로틀링을 적용하여 중복 요청을 방지합니다.
+  ///
+  /// ```swift
+  /// let provider = MoyaProvider<APIService>()
+  /// let disposable = provider.requestRxSingle(.getUser(id: 1), decodeTo: User.self)
+  ///     .subscribe(
+  ///         onSuccess: { user in
+  ///             print("User: \(user)")
+  ///         },
+  ///         onFailure: { error in
+  ///             print("Error: \(error)")
+  ///         }
+  ///     )
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - target: 호출할 Moya `Target` 엔드포인트
+  ///   - type: 디코딩할 `Decodable` 타입
+  /// - Returns: 디코딩된 객체를 방출하는 `Single<T>`
   public func requestRxSingle<T: Decodable>(
     _ target: Target,
     decodeTo type: T.Type
@@ -418,7 +538,32 @@ extension MoyaProvider {
   }
 
   // MARK: - RxSwift Observable
-  /// RxSwift `Observable<T>`로 요청하고 디코딩된 객체를 방출합니다.
+  
+  /// RxSwift Observable을 사용한 네트워크 요청
+  ///
+  /// 이 메서드는 RxSwift의 `Observable<T>` 타입을 반환하여 여러 값을 방출할 수 있는
+  /// reactive 스트림을 제공합니다. 300ms 스로틀링을 적용하여 중복 요청을 방지합니다.
+  ///
+  /// ```swift
+  /// let provider = MoyaProvider<APIService>()
+  /// let disposable = provider.requestRxObservable(.getUpdates, decodeTo: Update.self)
+  ///     .subscribe(
+  ///         onNext: { update in
+  ///             print("Update: \(update)")
+  ///         },
+  ///         onError: { error in
+  ///             print("Error: \(error)")
+  ///         },
+  ///         onCompleted: {
+  ///             print("Completed")
+  ///         }
+  ///     )
+  /// ```
+  ///
+  /// - Parameters:
+  ///   - target: 호출할 Moya `Target` 엔드포인트
+  ///   - type: 디코딩할 `Decodable` 타입
+  /// - Returns: 디코딩된 객체들을 방출하는 `Observable<T>`
   public func requestRxObservable<T: Decodable>(
     _ target: Target,
     decodeTo type: T.Type
