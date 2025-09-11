@@ -70,10 +70,21 @@ let disposable = provider.requestRxSingle(.getUser(id: 1), decodeTo: User.self)
 
 Moya의 `MoyaProvider`에 추가된 메서드들을 통해 다양한 방식으로 네트워킹을 수행할 수 있습니다:
 
-- async/await 기반 요청 메서드들
-- Combine 퍼블리셔 기반 요청
-- RxSwift Observable/Single 요청
-- AsyncStream 기반 스트리밍 요청
+#### Async/Await 메서드
+
+- ``MoyaProvider/requestAsync(_:decodeTo:)`` - Combine 기반 async/await 요청
+- ``MoyaProvider/requestAsyncAwait(_:decodeTo:)`` - 순수 async/await 요청  
+- ``MoyaProvider/requestAsyncAwaitAllow500(_:decodeTo:)`` - HTTP 500을 정상으로 처리하는 요청
+
+#### 스트리밍 메서드
+
+- ``MoyaProvider/requestAsyncStream(_:decodeTo:)`` - AsyncStream 기반 Result 스트리밍
+- ``MoyaProvider/requestAsyncThrowingStream(_:decodeTo:)`` - AsyncThrowingStream 기반 스트리밍
+
+#### RxSwift 메서드
+
+- ``MoyaProvider/requestRxSingle(_:decodeTo:)`` - RxSwift Single 요청
+- ``MoyaProvider/requestRxObservable(_:decodeTo:)`` - RxSwift Observable 요청
 
 ### 에러 처리
 
@@ -88,6 +99,16 @@ Data 타입 확장을 통해 편리한 JSON 디코딩 기능을 제공합니다.
 ``MoyaLoggingPlugin``을 통해 상세한 네트워킹 로그를 확인할 수 있습니다.
 
 ## Topics
+
+### MoyaProvider Extensions
+
+- ``MoyaProvider/requestAsync(_:decodeTo:)``
+- ``MoyaProvider/requestAsyncAwait(_:decodeTo:)``
+- ``MoyaProvider/requestAsyncAwaitAllow500(_:decodeTo:)``
+- ``MoyaProvider/requestAsyncStream(_:decodeTo:)``
+- ``MoyaProvider/requestAsyncThrowingStream(_:decodeTo:)``
+- ``MoyaProvider/requestRxSingle(_:decodeTo:)``
+- ``MoyaProvider/requestRxObservable(_:decodeTo:)``
 
 ### Error Handling
 
