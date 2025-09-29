@@ -17,7 +17,7 @@ import RxSwift
 import LogMacro
 import EventLimiter
 
-@MainActor
+
 extension MoyaProvider {
   // MARK: - Combine 퍼블리셔 기반 async/await 요청
   
