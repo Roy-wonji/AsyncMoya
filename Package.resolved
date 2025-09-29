@@ -1,5 +1,5 @@
 {
-  "originHash" : "078b16af2bafd492899c3c8727858b54f2a89dbfdf028160a7e0137780f4f51d",
+  "originHash" : "fcf4b24a7221bec3712650d049cae3dabbc4556257d27388cdd503af24a1b767",
   "pins" : [
     {
       "identity" : "alamofire",
@@ -24,8 +24,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/Roy-wonji/LogMacro.git",
       "state" : {
-        "revision" : "b3925408303ea8efa580112131d7118b09e102d1",
-        "version" : "1.1.0"
+        "revision" : "593b210346cf7145074c2d94fa4206bbc70198e0",
+        "version" : "1.1.1"
       }
     },
     {
@@ -78,8 +78,8 @@
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/apple/swift-syntax.git",
       "state" : {
-        "revision" : "f99ae8aa18f0cf0d53481901f88a0991dc3bd4a2",
-        "version" : "601.0.1"
+        "revision" : "0687f71944021d616d34d922343dcef086855920",
+        "version" : "600.0.1"
       }
     }
   ],
