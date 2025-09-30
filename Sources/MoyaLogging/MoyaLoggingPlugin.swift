@@ -65,7 +65,7 @@ import LogMacro
 /// ```
 ///
 /// > Important: 이 플러그인은 DEBUG 빌드에서만 로그를 출력합니다. Release 빌드에서는 성능에 영향을 주지 않습니다.
-public class MoyaLoggingPlugin: @preconcurrency PluginType {
+public class MoyaLoggingPlugin: @MainActor PluginType {
   /// 플러그인 인스턴스를 생성합니다.
   public init() {}
 

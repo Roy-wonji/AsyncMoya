@@ -34,7 +34,7 @@ extension MoyaProvider {
   ///
   /// - Parameters:
   ///   - target: 호출할 Moya `Target` 엔드포인트
-  ///   - type: 디코딩할 `Decodable & Sendable` 타입
+  ///   - type: 디코딩할 `Decodable` 타입
   /// - Returns: 디코딩된 객체 `T`
   /// - Throws: 
   ///   - `DataError.noData`: HTTP 응답이 없는 경우
