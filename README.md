@@ -99,27 +99,27 @@ let provider = MoyaProvider<GitHubAPI>(plugins: [MoyaLoggingPlugin()])
 
 ### 🔥 Async/Await (추천)
 
-#### 1. requestAsync - Combine + async/await
+#### 1. request - Combine + async/await
 
 ```swift
 func getUser() async throws -> User {
-    return try await provider.requestAsync(.user("octocat"), decodeTo: User.self)
+    return try await provider.request(.user("octocat"), decodeTo: User.self)
 }
 ```
 
-#### 2. requestAsyncAwait - 순수 async/await
+#### 2. requestAwait - 순수 async/await
 
 ```swift
 func getUser() async throws -> User {
-    return try await provider.requestAsyncAwait(.user("octocat"), decodeTo: User.self)
+    return try await provider.requestAwait(.user("octocat"), decodeTo: User.self)
 }
 ```
 
-#### 3. requestAsyncAwaitAllow500 - HTTP 500 허용
+#### 3. requestAllow500 - HTTP 500 허용
 
 ```swift
 func getSpecialEndpoint() async throws -> Response {
-    return try await provider.requestAsyncAwaitAllow500(.special, decodeTo: Response.self)
+    return try await provider.requestAllow500(.special, decodeTo: Response.self)
 }
 ```
 
@@ -129,7 +129,7 @@ func getSpecialEndpoint() async throws -> Response {
 
 ```swift
 func getUpdates() async throws {
-    let stream = provider.requestAsyncThrowingStream(.updates, decodeTo: Update.self)
+    let stream = provider.requestThrowingStream(.updates, decodeTo: Update.self)
     
     do {
         for try await update in stream {
@@ -145,7 +145,7 @@ func getUpdates() async throws {
 
 ```swift
 func getUpdatesWithErrorHandling() async {
-    let stream = provider.requestAsyncStream(.updates, decodeTo: Update.self)
+    let stream = provider.requestStream(.updates, decodeTo: Update.self)
     
     for await result in stream {
         switch result {
@@ -196,7 +196,7 @@ let disposable = getRepos()
 
 ```swift
 do {
-    let user = try await provider.requestAsync(.user("octocat"), decodeTo: User.self)
+    let user = try await provider.request(.user("octocat"), decodeTo: User.self)
     print("사용자: \(user)")
 } catch let error as DataError {
     switch error {
@@ -256,7 +256,7 @@ URL: https://api.github.com/users/octocat
 특별한 요구사항이 있는 API를 위해 HTTP 500을 성공으로 처리하는 메서드를 제공합니다.
 
 ```swift
-let result = try await provider.requestAsyncAwaitAllow500(.endpoint, decodeTo: Response.self)
+let result = try await provider.requestAllow500(.endpoint, decodeTo: Response.self)
 ```
 
 ## 🏗️ 문서 빌드
@@ -298,4 +298,3 @@ AsyncMoya는 MIT 라이선스로 이용할 수 있습니다. 자세한 내용은
 ---
 
 **Made with ❤️ by Roy**
-

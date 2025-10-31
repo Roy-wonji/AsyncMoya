@@ -33,7 +33,7 @@ import Moya
 ///
 /// ```swift
 /// do {
-///     let result = try await provider.requestAsync(.getUser, decodeTo: User.self)
+///     let result = try await provider.request(.getUser, decodeTo: User.self)
 /// } catch let error as DataError {
 ///     switch error {
 ///     case .noData:

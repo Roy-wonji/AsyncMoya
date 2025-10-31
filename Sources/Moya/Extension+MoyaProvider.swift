@@ -29,7 +29,7 @@ extension MoyaProvider {
   ///
   /// ```swift
   /// let provider = MoyaProvider<APIService>()
-  /// let user = try await provider.requestAsync(.getUser(id: 1), decodeTo: User.self)
+  /// let user = try await provider.request(.getUser(id: 1), decodeTo: User.self)
   /// ```
   ///
   /// - Parameters:
@@ -42,7 +42,7 @@ extension MoyaProvider {
   ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
   ///   - `DataError.unhandledStatusCode`: 처리되지 않은 HTTP 상태 코드
   ///   - 디코딩 오류, 네트워크 오류 등
-  public func requestAsync<T: Decodable & Sendable>(
+  public func request<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) async throws ->  T {
@@ -119,7 +119,7 @@ extension MoyaProvider {
   ///
   /// ```swift
   /// let provider = MoyaProvider<APIService>()
-  /// let result = try await provider.requestAsyncAwaitAllow500(.specialEndpoint, decodeTo: Response.self)
+  /// let result = try await provider.requestAllow500(.specialEndpoint, decodeTo: Response.self)
   /// ```
   ///
   /// - Parameters:
@@ -131,7 +131,7 @@ extension MoyaProvider {
   ///   - `MoyaError.statusCode`: HTTP 400 상태 코드
   ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
   ///   - `DataError.unhandledStatusCode`: 509 및 기타 처리되지 않은 상태 코드
-  public func requestAsyncAwaitAllow500<T: Decodable & Sendable>(
+  public func requestAllow500<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) async throws -> T {
@@ -209,7 +209,7 @@ extension MoyaProvider {
   ///
   /// ```swift
   /// let provider = MoyaProvider<APIService>()
-  /// let user = try await provider.requestAsyncAwait(.getUser(id: 1), decodeTo: User.self)
+  /// let user = try await provider.requestAwait(.getUser(id: 1), decodeTo: User.self)
   /// ```
   ///
   /// - Parameters:
@@ -221,7 +221,7 @@ extension MoyaProvider {
   ///   - `MoyaError.statusCode`: HTTP 400 상태 코드
   ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
   ///   - `DataError.unhandledStatusCode`: 처리되지 않은 HTTP 상태 코드
-  public func requestAsyncAwait<T: Decodable & Sendable>(
+  public func requestAwait<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) async throws -> T {
@@ -297,7 +297,7 @@ extension MoyaProvider {
   ///
   /// ```swift
   /// let provider = MoyaProvider<APIService>()
-  /// let stream = provider.requestAsyncThrowingStream(.getUpdates, decodeTo: Update.self)
+  /// let stream = provider.requestThrowingStream(.getUpdates, decodeTo: Update.self)
   /// 
   /// do {
   ///     for try await update in stream {
@@ -312,7 +312,7 @@ extension MoyaProvider {
   ///   - target: 호출할 Moya `Target` 엔드포인트
   ///   - type: 디코딩할 `Decodable & Sendable` 타입
   /// - Returns: 디코딩된 객체들을 방출하는 `AsyncThrowingStream<T, Error>`
-  public func requestAsyncThrowingStream<T: Decodable & Sendable>(
+  public func requestThrowingStream<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) -> AsyncThrowingStream<T, Error> {
@@ -389,7 +389,7 @@ extension MoyaProvider {
   ///
   /// ```swift
   /// let provider = MoyaProvider<APIService>()
-  /// let stream = provider.requestAsyncStream(.getUpdates, decodeTo: Update.self)
+  /// let stream = provider.requestStream(.getUpdates, decodeTo: Update.self)
   /// 
   /// for await result in stream {
   ///     switch result {
@@ -405,7 +405,7 @@ extension MoyaProvider {
   ///   - target: 호출할 Moya `Target` 엔드포인트
   ///   - type: 디코딩할 `Decodable & Sendable` 타입
   /// - Returns: Result로 래핑된 디코딩된 객체들을 방출하는 `AsyncStream<Result<T, Error>>`
-  public func requestAsyncStream<T: Decodable & Sendable>(
+  public func requestStream<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) -> AsyncStream<Result<T, Error>> {

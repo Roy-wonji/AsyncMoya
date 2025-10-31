@@ -179,7 +179,7 @@ jobs:
 ///
 /// ```swift
 /// // 사용 예제
-/// let result = try await provider.requestAsync(.getUser, decodeTo: User.self)
+/// let result = try await provider.request(.getUser, decodeTo: User.self)
 /// ```
 ///
 /// - Parameters:
@@ -187,7 +187,7 @@ jobs:
 ///   - type: 디코딩할 타입
 /// - Returns: 디코딩된 객체
 /// - Throws: 네트워크 오류 또는 디코딩 오류
-public func requestAsync<T: Decodable & Sendable>(
+public func request<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
 ) async throws -> T {
@@ -265,7 +265,7 @@ DocC는 문서의 코드 예제가 실제로 컴파일되는지 확인할 수 �
 /// ```swift
 /// // 이 코드는 실제로 컴파일되어 검증됩니다
 /// let provider = MoyaProvider<APIService>()
-/// let user = try await provider.requestAsync(.getUser(id: 1), decodeTo: User.self)
+/// let user = try await provider.request(.getUser(id: 1), decodeTo: User.self)
 /// ```
 ```
 
@@ -273,7 +273,7 @@ DocC는 문서의 코드 예제가 실제로 컴파일되는지 확인할 수 �
 
 ```swift
 /// 이 메서드는 ``DataError``를 던질 수 있습니다.
-/// 자세한 정보는 ``MoyaProvider/requestAsync(_:decodeTo:)``를 참조하세요.
+/// 자세한 정보는 ``MoyaProvider/request(_:decodeTo:)``를 참조하세요.
 ```
 
 ### 3. 플랫폼별 문서

@@ -42,7 +42,7 @@ import LogMacro
 /// )
 /// 
 /// // 이제 모든 네트워크 요청이 자동으로 로깅됩니다
-/// let user = try await provider.requestAsync(.getUser(id: 1), decodeTo: User.self)
+/// let user = try await provider.request(.getUser(id: 1), decodeTo: User.self)
 /// ```
 ///
 /// ## 로그 출력 예시
