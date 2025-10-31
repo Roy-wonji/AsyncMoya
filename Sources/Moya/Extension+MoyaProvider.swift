@@ -21,7 +21,7 @@ import EventLimiter
 extension MoyaProvider {
   // MARK: - Combine 퍼블리셔 기반 async/await 요청
   
-  /// Combine 퍼블리셔를 사용한 async/await 네트워크 요청
+  /// Combine 퍼블리셔 파이프라인을 async/await로 래핑한 네트워크 요청
   ///
   /// 이 메서드는 Combine의 `requestPublisher`를 사용하여 네트워크 요청을 수행하고,
   /// 결과를 지정된 타입으로 디코딩하여 반환합니다. 300ms 스로틀링을 적용하여
@@ -29,7 +29,7 @@ extension MoyaProvider {
   ///
   /// ```swift
   /// let provider = MoyaProvider<APIService>()
-  /// let user = try await provider.request(.getUser(id: 1), decodeTo: User.self)
+  /// let user = try await provider.requestWithCombine(.getUser(id: 1), decodeTo: User.self)
   /// ```
   ///
   /// - Parameters:
@@ -42,7 +42,7 @@ extension MoyaProvider {
   ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
   ///   - `DataError.unhandledStatusCode`: 처리되지 않은 HTTP 상태 코드
   ///   - 디코딩 오류, 네트워크 오류 등
-  public func request<T: Decodable & Sendable>(
+  public func requestWithCombine<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) async throws ->  T {
@@ -209,7 +209,7 @@ extension MoyaProvider {
   ///
   /// ```swift
   /// let provider = MoyaProvider<APIService>()
-  /// let user = try await provider.requestAwait(.getUser(id: 1), decodeTo: User.self)
+  /// let user = try await provider.request(.getUser(id: 1), decodeTo: User.self)
   /// ```
   ///
   /// - Parameters:
@@ -221,7 +221,7 @@ extension MoyaProvider {
   ///   - `MoyaError.statusCode`: HTTP 400 상태 코드
   ///   - `DataError.customError`: HTTP 404 상태 코드와 함께 커스텀 에러 응답
   ///   - `DataError.unhandledStatusCode`: 처리되지 않은 HTTP 상태 코드
-  public func requestAwait<T: Decodable & Sendable>(
+  public func request<T: Decodable & Sendable>(
     _ target: Target,
     decodeTo type: T.Type
   ) async throws -> T {

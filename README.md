@@ -99,19 +99,19 @@ let provider = MoyaProvider<GitHubAPI>(plugins: [MoyaLoggingPlugin()])
 
 ### 🔥 Async/Await (추천)
 
-#### 1. request - Combine + async/await
+#### 1. requestWithCombine - Combine + async/await 래핑
+
+```swift
+func getUser() async throws -> User {
+    return try await provider.requestWithCombine(.user("octocat"), decodeTo: User.self)
+}
+```
+
+#### 2. request - 순수 async/await
 
 ```swift
 func getUser() async throws -> User {
     return try await provider.request(.user("octocat"), decodeTo: User.self)
-}
-```
-
-#### 2. requestAwait - 순수 async/await
-
-```swift
-func getUser() async throws -> User {
-    return try await provider.requestAwait(.user("octocat"), decodeTo: User.self)
 }
 ```
 

@@ -72,8 +72,8 @@ Moya의 `MoyaProvider`에 추가된 메서드들을 통해 다양한 방식으�
 
 #### Async/Await 메서드
 
-- ``MoyaProvider/request(_:decodeTo:)`` - Combine 기반 async/await 요청
-- ``MoyaProvider/requestAwait(_:decodeTo:)`` - 순수 async/await 요청  
+- ``MoyaProvider/requestWithCombine(_:decodeTo:)`` - Combine 기반 async/await 요청
+- ``MoyaProvider/request(_:decodeTo:)`` - 순수 async/await 요청  
 - ``MoyaProvider/requestAllow500(_:decodeTo:)`` - HTTP 500을 정상으로 처리하는 요청
 
 #### 스트리밍 메서드
@@ -100,8 +100,8 @@ Data 타입 확장을 통해 편리한 JSON 디코딩 기능을 제공합니다.
 
 ## Topics
 
+- ``MoyaProvider/requestWithCombine(_:decodeTo:)``
 - ``MoyaProvider/request(_:decodeTo:)``
-- ``MoyaProvider/requestAwait(_:decodeTo:)``
 - ``MoyaProvider/requestAllow500(_:decodeTo:)``
 - ``MoyaProvider/requestStream(_:decodeTo:)``
 - ``MoyaProvider/requestThrowingStream(_:decodeTo:)``
