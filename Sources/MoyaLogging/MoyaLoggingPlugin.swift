@@ -65,7 +65,8 @@ import LogMacro
 /// ```
 ///
 /// > Important: 이 플러그인은 DEBUG 빌드에서만 로그를 출력합니다. Release 빌드에서는 성능에 영향을 주지 않습니다.
-public class MoyaLoggingPlugin: @MainActor PluginType {
+@MainActor
+public class MoyaLoggingPlugin: @preconcurrency PluginType {
   /// 플러그인 인스턴스를 생성합니다.
   public init() {}
 
@@ -86,7 +87,7 @@ public class MoyaLoggingPlugin: @MainActor PluginType {
   /// - Parameters:
   ///   - request: 래핑된 `RequestType` 객체
   ///   - target: API 엔드포인트를 나타내는 `TargetType`
-  @MainActor
+
   public func willSend(_ request: RequestType, target: TargetType) {
     guard let httpRequest = request.request else {
 #if DEBUG
