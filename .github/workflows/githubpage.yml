@@ -1,31 +1,78 @@
+# on:
+#   # "main" 브랜치에 푸시할 때마다 워크플로우 작동
+#   push:
+#     branches: [ "main" ]
+
+# # GitHub Pages에 배포하기 위한 GITHUB_TOKEN 권한 설정
+# permissions:
+#   contents: write
+#   pages: write
+#   id-token: write
+
+# # 동시성 배포 허용
+# concurrency:
+#   group: "pages"
+#   cancel-in-progress: true
+
+# jobs:
+#   build-and-deploy:
+#     name: Generate Documentation and Deploy
+#     runs-on: macos-latest
+
+#     steps:
+#       - name: Checkout repository
+#         uses: actions/checkout@v3
+#         with:
+#           # GITHUB_TOKEN을 사용해 gh-pages 브랜치에도 push할 수 있도록 전체 히스토리를 가져옵니다.
+#           fetch-depth: 0
+#           # GITHUB_TOKEN으로 선언된 권한을 사용합니다.
+#           persist-credentials: true
+
+#       - name: Set up Swift 6.1
+#         uses: fwal/setup-swift@v2
+#         with:
+#           swift-version: "6.1.0"
+
+#       - name: Generate documentation
+#         run: |
+#           chmod +x ./GENERATE_DOCS.sh
+#           ./GENERATE_DOCS.sh
+
+#       - name: Deploy to GitHub Pages
+#         uses: peaceiris/actions-gh-pages@v3
+#         with:
+#           # 별도 토큰 없이 내장 GITHUB_TOKEN을 사용합니다.
+#           github_token: ${{ secrets.GITHUB_TOKEN }}
+#           publish_dir: ./docs
+#           # publish_branch 또는 commit_message를 필요에 따라 설정하세요.
+name: Build Docs and Deploy
+
 on:
-  # "main" 브랜치에 푸시할 때마다 워크플로우 작동
   push:
     branches: [ "main" ]
 
-# GitHub Pages에 배포하기 위한 GITHUB_TOKEN 권한 설정
 permissions:
   contents: write
   pages: write
   id-token: write
 
-# 동시성 배포 허용
 concurrency:
   group: "pages"
   cancel-in-progress: true
 
 jobs:
   build-and-deploy:
-    name: Generate Documentation and Deploy
     runs-on: macos-latest
 
+    env:
+      DOC_TARGET: YourLibraryTargetName   # ← 여기만 네 SwiftPM 타깃명으로 변경
+      REPO_NAME: ${{ github.event.repository.name }}
+
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
+      - name: Checkout
+        uses: actions/checkout@v4
         with:
-          # GITHUB_TOKEN을 사용해 gh-pages 브랜치에도 push할 수 있도록 전체 히스토리를 가져옵니다.
           fetch-depth: 0
-          # GITHUB_TOKEN으로 선언된 권한을 사용합니다.
           persist-credentials: true
 
       - name: Set up Swift 6.1
@@ -33,15 +80,40 @@ jobs:
         with:
           swift-version: "6.1.0"
 
-      - name: Generate documentation
+      - name: Print environment for debugging
         run: |
-          chmod +x ./GENERATE_DOCS.sh
-          ./GENERATE_DOCS.sh
+          set -euxo pipefail
+          sw_vers || true
+          xcodebuild -version || true
+          swift --version
+          ls -la
+          cat Package.swift
 
-      - name: Deploy to GitHub Pages
+      # DocC 플러그인 의존성 필요:
+      # Package.swift의 dependencies에 아래가 있어야 함
+      # .package(url: "https://github.com/apple/swift-docc-plugin", from: "1.3.0"),
+      # 없으면 이 스텝에서 에러가 납니다.
+      - name: Generate DocC to ./docs
+        run: |
+          set -euxo pipefail
+          rm -rf docs
+          swift package --allow-writing-to-directory docs \
+            generate-documentation \
+            --target "$DOC_TARGET" \
+            --output-path docs \
+            --transform-for-static-hosting \
+            --hosting-base-path "$REPO_NAME"
+          test -d docs
+
+      - name: Show docs tree
+        run: |
+          set -euxo pipefail
+          du -sh docs || true
+          ls -la docs | sed -n '1,200p'
+
+      - name: Deploy to GitHub Pages (gh-pages)
         uses: peaceiris/actions-gh-pages@v3
         with:
-          # 별도 토큰 없이 내장 GITHUB_TOKEN을 사용합니다.
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_dir: ./docs
-          # publish_branch 또는 commit_message를 필요에 따라 설정하세요.
+          # publish_branch: gh-pages  # 기본값 gh-pages, 필요 시 지정
