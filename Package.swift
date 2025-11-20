@@ -15,7 +15,6 @@ let package = Package(
   dependencies: [
     .package(url: "https://github.com/Moya/Moya.git", from: "15.0.3"),
     .package(url: "https://github.com/Roy-wonji/LogMacro.git", exact: "1.1.1"),
-    .package(url: "https://github.com/baekteun/EventLimiter.git", from: "2.0.0"),
     .package(url: "https://github.com/apple/swift-docc-plugin.git", exact: "1.4.4"),
   ],
   targets: [
@@ -25,8 +24,7 @@ let package = Package(
         .product(name: "Moya", package: "Moya"),
         .product(name: "CombineMoya", package: "Moya"),
         .product(name: "RxMoya", package: "Moya"),
-        .product(name: "LogMacro", package: "LogMacro"),
-        .product(name: "EventLimiter", package: "EventLimiter")
+        .product(name: "LogMacro", package: "LogMacro")
       ],
       path: "Sources"
 
