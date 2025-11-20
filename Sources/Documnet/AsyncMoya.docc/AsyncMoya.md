@@ -52,7 +52,7 @@ extension APIService: TargetType {
 let provider = MoyaProvider<APIService>()
 
 // Async/Await 방식
-let user = try await provider.request(.getUser(id: 1), decodeTo: User.self)
+let user = try await provider.request(.getUser(id: 1))
 
 // Combine 방식
 let cancellable = provider.requestPublisher(.getUser(id: 1))
@@ -60,7 +60,7 @@ let cancellable = provider.requestPublisher(.getUser(id: 1))
     .sink(receiveCompletion: { _ in }, receiveValue: { user in })
 
 // RxSwift 방식
-let disposable = provider.requestRxSingle(.getUser(id: 1), decodeTo: User.self)
+let disposable = provider.requestRxSingle(.getUser(id: 1))
     .subscribe(onSuccess: { user in }, onFailure: { error in })
 ```
 
@@ -72,19 +72,18 @@ Moya의 `MoyaProvider`에 추가된 메서드들을 통해 다양한 방식으�
 
 #### Async/Await 메서드
 
-- ``MoyaProvider/requestWithCombine(_:decodeTo:)`` - Combine 기반 async/await 요청
-- ``MoyaProvider/request(_:decodeTo:)`` - 순수 async/await 요청  
-- ``MoyaProvider/requestAllow500(_:decodeTo:)`` - HTTP 500을 정상으로 처리하는 요청
+- ``MoyaProvider/requestWithCombine(_:)`` - Combine 기반 async/await 요청
+- ``MoyaProvider/request(_:)`` - 순수 async/await 요청  
 
 #### 스트리밍 메서드
 
-- ``MoyaProvider/requestStream(_:decodeTo:)`` - AsyncStream 기반 Result 스트리밍
-- ``MoyaProvider/requestThrowingStream(_:decodeTo:)`` - AsyncThrowingStream 기반 스트리밍
+- ``MoyaProvider/requestStream(_:)`` - AsyncStream 기반 Result 스트리밍
+- ``MoyaProvider/requestThrowingStream(_:)`` - AsyncThrowingStream 기반 스트리밍
 
 #### RxSwift 메서드
 
-- ``MoyaProvider/requestRxSingle(_:decodeTo:)`` - RxSwift Single 요청
-- ``MoyaProvider/requestRxObservable(_:decodeTo:)`` - RxSwift Observable 요청
+- ``MoyaProvider/requestRxSingle(_:)`` - RxSwift Single 요청
+- ``MoyaProvider/requestRxObservable(_:)`` - RxSwift Observable 요청
 
 ### 에러 처리
 
@@ -100,13 +99,12 @@ Data 타입 확장을 통해 편리한 JSON 디코딩 기능을 제공합니다.
 
 ## Topics
 
-- ``MoyaProvider/requestWithCombine(_:decodeTo:)``
-- ``MoyaProvider/request(_:decodeTo:)``
-- ``MoyaProvider/requestAllow500(_:decodeTo:)``
-- ``MoyaProvider/requestStream(_:decodeTo:)``
-- ``MoyaProvider/requestThrowingStream(_:decodeTo:)``
-- ``MoyaProvider/requestRxSingle(_:decodeTo:)``
-- ``MoyaProvider/requestRxObservable(_:decodeTo:)``
+- ``MoyaProvider/requestWithCombine(_:)``
+- ``MoyaProvider/request(_:)``
+- ``MoyaProvider/requestStream(_:)``
+- ``MoyaProvider/requestThrowingStream(_:)``
+- ``MoyaProvider/requestRxSingle(_:)``
+- ``MoyaProvider/requestRxObservable(_:)``
 
 ### Error Handling
 

@@ -65,8 +65,7 @@ import LogMacro
 /// ```
 ///
 /// > Important: 이 플러그인은 DEBUG 빌드에서만 로그를 출력합니다. Release 빌드에서는 성능에 영향을 주지 않습니다.
-@MainActor
-public class MoyaLoggingPlugin: @preconcurrency PluginType {
+public class MoyaLoggingPlugin: PluginType {
   /// 플러그인 인스턴스를 생성합니다.
   public init() {}
 
@@ -124,7 +123,6 @@ API: \(target)
   /// - Parameters:
   ///   - result: 성공 시 `Response`, 실패 시 `MoyaError`를 포함한 `Result`
   ///   - target: API 엔드포인트를 나타내는 `TargetType`
-  @MainActor
   public func didReceive(_ result: Result<Response, MoyaError>, target: TargetType) {
     switch result {
     case let .success(response):
@@ -150,7 +148,6 @@ API: \(target)
   ///   - response: 성공적으로 받은 `Response` 객체
   ///   - target: API 엔드포인트를 나타내는 `TargetType`
   ///   - isFromError: 에러 핸들러에서 전달된 응답인지 여부
-  @MainActor
   public func onSucceed(_ response: Response, target: TargetType, isFromError: Bool) {
     let urlString = response.request?.url?.absoluteString ?? "알 수 없는 URL"
     let statusCode = response.statusCode
@@ -172,7 +169,6 @@ API: \(target)
   /// - Parameters:
   ///   - error: 발생한 `MoyaError`
   ///   - target: API 엔드포인트를 나타내는 `TargetType`
-  @MainActor
   public func onFail(_ error: MoyaError, target: TargetType) {
     if let response = error.response {
       // 응답을 포함한 에러는 성공 로깅으로 처리

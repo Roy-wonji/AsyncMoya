@@ -9,5 +9,3 @@
 @_exported import Moya
 @_exported import OSLog
 @_exported import LogMacro
-@_exported import EventLimiter
-

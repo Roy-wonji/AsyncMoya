@@ -103,7 +103,7 @@ let provider = MoyaProvider<GitHubAPI>(plugins: [MoyaLoggingPlugin()])
 
 ```swift
 func getUser() async throws -> User {
-    return try await provider.requestWithCombine(.user("octocat"), decodeTo: User.self)
+    return try await provider.requestWithCombine(.user("octocat"))
 }
 ```
 
@@ -111,15 +111,7 @@ func getUser() async throws -> User {
 
 ```swift
 func getUser() async throws -> User {
-    return try await provider.request(.user("octocat"), decodeTo: User.self)
-}
-```
-
-#### 3. requestAllow500 - HTTP 500 허용
-
-```swift
-func getSpecialEndpoint() async throws -> Response {
-    return try await provider.requestAllow500(.special, decodeTo: Response.self)
+    return try await provider.request(.user("octocat"))
 }
 ```
 
@@ -129,7 +121,7 @@ func getSpecialEndpoint() async throws -> Response {
 
 ```swift
 func getUpdates() async throws {
-    let stream = provider.requestThrowingStream(.updates, decodeTo: Update.self)
+    let stream = provider.requestThrowingStream(.updates)
     
     do {
         for try await update in stream {
@@ -145,7 +137,7 @@ func getUpdates() async throws {
 
 ```swift
 func getUpdatesWithErrorHandling() async {
-    let stream = provider.requestStream(.updates, decodeTo: Update.self)
+    let stream = provider.requestStream(.updates)
     
     for await result in stream {
         switch result {
@@ -166,7 +158,7 @@ func getUpdatesWithErrorHandling() async {
 import RxSwift
 
 func getUser() -> Single<User> {
-    return provider.requestRxSingle(.user("octocat"), decodeTo: User.self)
+    return provider.requestRxSingle(.user("octocat"))
 }
 
 // 사용 예시
@@ -181,7 +173,7 @@ let disposable = getUser()
 
 ```swift
 func getRepos() -> Observable<[Repository]> {
-    return provider.requestRxObservable(.repos("octocat"), decodeTo: [Repository].self)
+    return provider.requestRxObservable(.repos("octocat"))
 }
 
 // 사용 예시
@@ -196,7 +188,7 @@ let disposable = getRepos()
 
 ```swift
 do {
-    let user = try await provider.request(.user("octocat"), decodeTo: User.self)
+    let user = try await provider.request(.user("octocat"))
     print("사용자: \(user)")
 } catch let error as DataError {
     switch error {
@@ -250,14 +242,6 @@ URL: https://api.github.com/users/octocat
 ### 자동 스로틀링
 
 모든 요청 메서드는 300ms 자동 스로틀링을 적용하여 중복 요청을 방지합니다.
-
-### HTTP 500 허용
-
-특별한 요구사항이 있는 API를 위해 HTTP 500을 성공으로 처리하는 메서드를 제공합니다.
-
-```swift
-let result = try await provider.requestAllow500(.endpoint, decodeTo: Response.self)
-```
 
 ## 🏗️ 문서 빌드
 
