@@ -47,7 +47,7 @@ public extension BaseTargetType {
 
 // 순수 캐시
 public enum APIHeaders {
-  static var cached: [String: String] = [
+  static let cached: [String: String] = [
     "Content-Type": "application/json"
   ]
 }
